@@ -8,17 +8,17 @@ import net.xeoh.plugins.base.annotations.PluginImplementation;
 
 @PluginImplementation
 @Log4j2
-public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
+public class OtherSampleMetadataPlugin implements IMetadataEditorExtension {
 
     private static final long serialVersionUID = 3644294549629729916L;
 
     @Getter
-    private String pagePath = "/uii/plugin_metadata_changeType.xhtml";
+    private String pagePath = "/uii/plugin_metadata_sample.xhtml";
 
     @Getter
-    private String title = "intranda_metadata_changeType";
+    private String title = "intranda_metadata_sample";
 
     @Getter
-    private String modalId = "#changeTypeModal";
+    private String modalId = "#sampleModal";
 
 }
