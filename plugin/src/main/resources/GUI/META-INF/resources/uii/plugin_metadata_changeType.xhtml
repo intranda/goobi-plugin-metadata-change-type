@@ -15,9 +15,9 @@
 
     <composite:implementation>
         <!-- VIAF MODAL -->
-        <div 
+        <h:panelGroup layout="block" 
             id="changeTypeModal" 
-            class="modal fade" 
+            styleClass="modal fade" 
             tabindex="-1" 
             role="dialog"
             aria-hidden="true">
@@ -27,7 +27,7 @@
                     layout="block"
                     styleClass="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title">TITLE</h1>
+                        <h1 class="modal-title">#{msgs[Metadaten.extension.title]}</h1>
 
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">
@@ -35,16 +35,38 @@
                             </span>
                         </button>
                     </div>
-                    <div class="modal-body">
+                    <h:panelGroup layout="block" styleClass="modal-body" rendered="#{Metadaten.extension.title == 'intranda_metadata_changeType'}">
+                     <h:form>
                         <p>
-                            <h:outputText value="BODY" escape="false" />
-                        </p>
+                            <intranda:formInputDropDown
+                                id="tempate"
+                                label="#{msgs.mtadataTemplate}"
+                                field="#{Metadaten.extension.selectedTemplate}"
+                                help="#{msgs.helpMetadataTemplate}"
+                                name="prozess"
+                                selectItems="#{Metadaten.extension.metadataTemplates}"
+                                fieldStyle="form-control"
+                                required="true" />
                         
-                    </div>
+                       <button
+                                    jsf:id="changeTemplate"
+                                    class="dropdown-item"
+                       
+                                    jsf:action="#{Metadaten.extension.changeTemplate}"
+                                    >
+                                    <i
+                                        class="fa fa-save"
+                                        aria-hidden="true"></i>
+                                    <h:outputText value="#{msgs.changeTemplate}" />
+                                     
+                                </button>
+                        </p>
+                        </h:form>
+                    </h:panelGroup>
 
 
                 </h:panelGroup>
             </div>
-        </div>
+        </h:panelGroup>
     </composite:implementation>
 </ui:composition>

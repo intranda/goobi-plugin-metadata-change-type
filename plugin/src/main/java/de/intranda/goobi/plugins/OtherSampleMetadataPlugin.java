@@ -2,6 +2,7 @@ package de.intranda.goobi.plugins;
 
 import org.goobi.production.plugin.interfaces.IMetadataEditorExtension;
 
+import de.sub.goobi.metadaten.Metadaten;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
@@ -19,6 +20,9 @@ public class OtherSampleMetadataPlugin implements IMetadataEditorExtension {
     private String title = "intranda_metadata_sample";
 
     @Getter
-    private String modalId = "#sampleModal";
+    private String modalId = "sampleModal";
 
+    public void initializePlugin(Metadaten bean) {
+        log.info("init sample plugin");
+    }
 }
