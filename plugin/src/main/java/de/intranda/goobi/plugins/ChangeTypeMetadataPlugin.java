@@ -30,7 +30,6 @@ import ugh.dl.MetadataGroup;
 import ugh.dl.Person;
 import ugh.exceptions.PreferencesException;
 import ugh.exceptions.ReadException;
-import ugh.exceptions.TypeNotAllowedForParentException;
 import ugh.exceptions.UGHException;
 import ugh.exceptions.WriteException;
 import ugh.fileformats.mets.MetsMods;
@@ -63,6 +62,7 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
 
     private Metadaten bean;
 
+    @Override
     public void initializePlugin(Metadaten bean) {
         this.bean = bean;
 
@@ -70,7 +70,7 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
         XMLConfiguration config = ConfigPlugins.getPluginConfig(title);
         config.setExpressionEngine(new XPathExpressionEngine());
 
-        // get metadata whitelist to import some existing metadata to the new document (uuid, identifier, ...) 
+        // get metadata whitelist to import some existing metadata to the new document (uuid, identifier, ...)
         metadataToCopy = Arrays.asList(config.getStringArray("/metadata"));
 
         // get folder for template files from configuration
@@ -91,9 +91,16 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
 
     public void changeTemplate() {
         // create backup of old fileformat
-     
-// TODO
-        
+
+        try {
+            Fileformat backup = new MetsMods(bean.getMyPrefs());
+            backup.setDigitalDocument(bean.getDocument());
+            backup.write(bean.getMyProzess().getMetadataFilePath().replace("meta.xml", "backup.xml"));
+        } catch (UGHException | IOException | SwapException e) {
+            log.error(e);
+            return;
+        }
+
         // create new fileformat based on selected template
 
         Path path = Paths.get(templateFolder, selectedTemplate);
@@ -114,21 +121,64 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
 
         DocStruct oldLogical = bean.getDocument().getLogicalDocStruct();
         for (String metadataName : metadataToCopy) {
-            for (Metadata md : oldLogical.getAllMetadata()) {
-                if (md.getType().getName().equals(metadataName)) {
-                    // TODO copy metadata
+            if (oldLogical.getAllMetadata() != null) {
+                for (Metadata md : oldLogical.getAllMetadata()) {
+                    if (md.getType().getName().equals(metadataName)) {
+                        try {
+                            Metadata newMd = new Metadata(md.getType());
+                            newMd.setValue(md.getValue());
+                            newMd.setAutorityFile(md.getAuthorityID(), md.getAuthorityURI(), md.getAuthorityValue());
+                            logical.addMetadata(newMd);
+                        } catch (UGHException e) {
+                            log.error(e);
+                        }
+
+                    }
                 }
             }
-
-            for (Person p : oldLogical.getAllPersons()) {
-                if (p.getType().getName().equals(metadataName)) {
-                    // TODO copy person
+            if (oldLogical.getAllPersons() != null) {
+                for (Person p : oldLogical.getAllPersons()) {
+                    if (p.getType().getName().equals(metadataName)) {
+                        try {
+                            Person person = new Person(p.getType());
+                            person.setFirstname(p.getFirstname());
+                            person.setLastname(p.getLastname());
+                            person.setAutorityFile(p.getAuthorityID(), p.getAuthorityURI(), p.getAuthorityValue());
+                            logical.addPerson(person);
+                        } catch (UGHException e) {
+                            log.error(e);
+                        }
+                    }
                 }
             }
+            if (oldLogical.getAllMetadataGroups() != null) {
+                for (MetadataGroup grp : oldLogical.getAllMetadataGroups()) {
+                    if (grp.getType().getName().equals(metadataName)) {
+                        try {
+                            MetadataGroup newGroup = new MetadataGroup(grp.getType());
+                            if (grp.getMetadataList() != null) {
+                                for (Metadata md : grp.getMetadataList()) {
+                                    Metadata newMd = new Metadata(md.getType());
+                                    newMd.setValue(md.getValue());
+                                    newMd.setAutorityFile(md.getAuthorityID(), md.getAuthorityURI(), md.getAuthorityValue());
+                                    newGroup.addMetadata(newMd);
+                                }
+                            }
+                            if (grp.getPersonList() != null) {
+                                for (Person p : grp.getPersonList()) {
+                                    Person person = new Person(p.getType());
+                                    person.setFirstname(p.getFirstname());
+                                    person.setLastname(p.getLastname());
+                                    person.setAutorityFile(p.getAuthorityID(), p.getAuthorityURI(), p.getAuthorityValue());
+                                    newGroup.addPerson(person);
+                                }
+                            }
+                            logical.addMetadataGroup(newGroup);
+                        } catch (UGHException e) {
+                            log.error(e);
+                        }
 
-            for (MetadataGroup grp : oldLogical.getAllMetadataGroups()) {
-                if (grp.getType().getName().equals(metadataName)) {
-                    // TODO copy group
+                    }
                 }
             }
 
@@ -136,21 +186,23 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
 
         // copy assigned pages to new file format
         DocStruct oldPhysical = bean.getDocument().getPhysicalDocStruct();
-        for (DocStruct oldPage : oldPhysical.getAllChildren()) {
-            try {
-                DocStruct newPage = digDoc.createDocStruct(oldPage.getType());
-                physical.addChild(newPage);
+        if (oldPhysical != null && oldPhysical.getAllChildren() != null) {
+            for (DocStruct oldPage : oldPhysical.getAllChildren()) {
+                try {
+                    DocStruct newPage = digDoc.createDocStruct(oldPage.getType());
+                    physical.addChild(newPage);
 
-                for (Metadata md : oldPage.getAllMetadata()) {
-                    Metadata newMd = new Metadata(md.getType());
-                    newMd.setValue(md.getValue());
-                    newPage.addMetadata(newMd);
+                    for (Metadata md : oldPage.getAllMetadata()) {
+                        Metadata newMd = new Metadata(md.getType());
+                        newMd.setValue(md.getValue());
+                        newPage.addMetadata(newMd);
+                    }
+
+                } catch (UGHException e) {
+                    log.error(e);
                 }
 
-            } catch (UGHException e) {
-                log.error(e);
             }
-
         }
 
         // save new ff as process metadata
