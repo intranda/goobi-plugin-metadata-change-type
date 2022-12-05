@@ -15,52 +15,77 @@
 
     <composite:implementation>
         <!-- VIAF MODAL -->
-        <h:panelGroup layout="block" 
-            id="changeTypeModal" 
-            styleClass="modal fade" 
-            tabindex="-1" 
+        <h:panelGroup
+            layout="block"
+            id="changeTypeModal"
+            styleClass="modal fade"
+            tabindex="-1"
             role="dialog"
             aria-hidden="true">
-            <div class="modal-dialog xxl" role="document">
-               <h:panelGroup
+            <div
+                class="modal-dialog"
+                role="document">
+                <h:panelGroup
                     id="changeTypeModalContent"
                     layout="block"
                     styleClass="modal-content">
                     <div class="modal-header">
                         <h1 class="modal-title">#{msgs[Metadaten.extension.title]}</h1>
-
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">
-                                <h:outputText value="&amp;times;" escape="false" />
+                        <button
+                            type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close">
+                            <span aria-hidden="true"> <h:outputText
+                                    value="&amp;times;"
+                                    escape="false" />
                             </span>
                         </button>
                     </div>
-                    <h:panelGroup layout="block" styleClass="modal-body" rendered="#{Metadaten.extension.title == 'intranda_metadata_changeType'}">
-                     <h:form>
-                        <p>
-                            <intranda:formInputDropDown
-                                id="tempate"
-                                label="#{msgs.mtadataTemplate}"
-                                field="#{Metadaten.extension.selectedTemplate}"
-                                help="#{msgs.helpMetadataTemplate}"
-                                name="prozess"
-                                selectItems="#{Metadaten.extension.metadataTemplates}"
-                                fieldStyle="form-control"
-                                required="true" />
-                        
-                       <button
-                                    jsf:id="changeTemplate"
-                                    class="dropdown-item"
-                       
-                                    jsf:action="#{Metadaten.extension.changeTemplate}"
-                                    >
-                                    <i
-                                        class="fa fa-save"
-                                        aria-hidden="true"></i>
-                                    <h:outputText value="#{msgs.changeTemplate}" />
-                                     
-                                </button>
-                        </p>
+
+                    <h:panelGroup
+                        layout="block"
+                        styleClass="modal-body"
+                        rendered="#{Metadaten.extension.title == 'intranda_metadata_changeType'}">
+                        <h:form styleClass="form-horizontal form-bordered">
+
+                            <div class="form-group form-group--flex">
+                                <div class="row justify-content-between">
+                                    <div class="col-3">
+                                        <h:outputText
+                                            styleClass="form-group__label"
+                                            value="#{msgs.mtadataTemplate}"
+                                            title="#{msgs.mtadataTemplate}" />
+                                    </div>
+                                    <div class="col-7">
+                                        <div class="form-control form-control--select">
+                                            <h:selectOneMenu
+                                                id="tempate"
+                                                value="#{Metadaten.extension.selectedTemplate}">
+                                                <f:selectItem
+                                                    itemValue="null"
+                                                    itemLabel="#{msgs.bitteAuswaehlen}" />
+                                                <f:selectItems value="#{Metadaten.extension.metadataTemplates}" />
+                                            </h:selectOneMenu>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-2">
+                                        <button
+                                            jsf:id="changeTemplate"
+                                            class="dropdown-item"
+                                            jsf:action="#{Metadaten.extension.changeTemplate}">
+                                            <i
+                                                class="fa fa-save"
+                                                aria-hidden="true"></i>
+                                            <h:outputText value="#{msgs.changeTemplate}" />
+
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+
                         </h:form>
                     </h:panelGroup>
 

@@ -28,6 +28,7 @@ import ugh.dl.Fileformat;
 import ugh.dl.Metadata;
 import ugh.dl.MetadataGroup;
 import ugh.dl.Person;
+import ugh.exceptions.MetadataTypeNotAllowedException;
 import ugh.exceptions.PreferencesException;
 import ugh.exceptions.ReadException;
 import ugh.exceptions.UGHException;
@@ -92,12 +93,7 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
     public void changeTemplate() {
         // create backup of old fileformat
 
-        try {
-            Fileformat backup = new MetsMods(bean.getMyPrefs());
-            backup.setDigitalDocument(bean.getDocument());
-            backup.write(bean.getMyProzess().getMetadataFilePath().replace("meta.xml", "backup.xml"));
-        } catch (UGHException | IOException | SwapException e) {
-            log.error(e);
+        if (!createBackup()) {
             return;
         }
 
@@ -121,66 +117,9 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
 
         DocStruct oldLogical = bean.getDocument().getLogicalDocStruct();
         for (String metadataName : metadataToCopy) {
-            if (oldLogical.getAllMetadata() != null) {
-                for (Metadata md : oldLogical.getAllMetadata()) {
-                    if (md.getType().getName().equals(metadataName)) {
-                        try {
-                            Metadata newMd = new Metadata(md.getType());
-                            newMd.setValue(md.getValue());
-                            newMd.setAutorityFile(md.getAuthorityID(), md.getAuthorityURI(), md.getAuthorityValue());
-                            logical.addMetadata(newMd);
-                        } catch (UGHException e) {
-                            log.error(e);
-                        }
-
-                    }
-                }
-            }
-            if (oldLogical.getAllPersons() != null) {
-                for (Person p : oldLogical.getAllPersons()) {
-                    if (p.getType().getName().equals(metadataName)) {
-                        try {
-                            Person person = new Person(p.getType());
-                            person.setFirstname(p.getFirstname());
-                            person.setLastname(p.getLastname());
-                            person.setAutorityFile(p.getAuthorityID(), p.getAuthorityURI(), p.getAuthorityValue());
-                            logical.addPerson(person);
-                        } catch (UGHException e) {
-                            log.error(e);
-                        }
-                    }
-                }
-            }
-            if (oldLogical.getAllMetadataGroups() != null) {
-                for (MetadataGroup grp : oldLogical.getAllMetadataGroups()) {
-                    if (grp.getType().getName().equals(metadataName)) {
-                        try {
-                            MetadataGroup newGroup = new MetadataGroup(grp.getType());
-                            if (grp.getMetadataList() != null) {
-                                for (Metadata md : grp.getMetadataList()) {
-                                    Metadata newMd = new Metadata(md.getType());
-                                    newMd.setValue(md.getValue());
-                                    newMd.setAutorityFile(md.getAuthorityID(), md.getAuthorityURI(), md.getAuthorityValue());
-                                    newGroup.addMetadata(newMd);
-                                }
-                            }
-                            if (grp.getPersonList() != null) {
-                                for (Person p : grp.getPersonList()) {
-                                    Person person = new Person(p.getType());
-                                    person.setFirstname(p.getFirstname());
-                                    person.setLastname(p.getLastname());
-                                    person.setAutorityFile(p.getAuthorityID(), p.getAuthorityURI(), p.getAuthorityValue());
-                                    newGroup.addPerson(person);
-                                }
-                            }
-                            logical.addMetadataGroup(newGroup);
-                        } catch (UGHException e) {
-                            log.error(e);
-                        }
-
-                    }
-                }
-            }
+            copyMetadata(logical, oldLogical, metadataName);
+            copyPerson(logical, oldLogical, metadataName);
+            copyGroup(logical, oldLogical, metadataName);
 
         }
 
@@ -220,6 +159,91 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
             log.error(e);
         }
 
+    }
+
+    private void copyGroup(DocStruct logical, DocStruct oldLogical, String metadataName) {
+        if (oldLogical.getAllMetadataGroups() != null) {
+            for (MetadataGroup grp : oldLogical.getAllMetadataGroups()) {
+                if (grp.getType().getName().equals(metadataName)) {
+                    try {
+                        MetadataGroup newGroup = duplicateGroup(grp);
+                        logical.addMetadataGroup(newGroup);
+                    } catch (UGHException e) {
+                        log.error(e);
+                    }
+
+                }
+            }
+        }
+    }
+
+    private MetadataGroup duplicateGroup(MetadataGroup grp) throws MetadataTypeNotAllowedException {
+        MetadataGroup newGroup = new MetadataGroup(grp.getType());
+        if (grp.getMetadataList() != null) {
+            for (Metadata md : grp.getMetadataList()) {
+                Metadata newMd = new Metadata(md.getType());
+                newMd.setValue(md.getValue());
+                newMd.setAutorityFile(md.getAuthorityID(), md.getAuthorityURI(), md.getAuthorityValue());
+                newGroup.addMetadata(newMd);
+            }
+        }
+        if (grp.getPersonList() != null) {
+            for (Person p : grp.getPersonList()) {
+                Person person = new Person(p.getType());
+                person.setFirstname(p.getFirstname());
+                person.setLastname(p.getLastname());
+                person.setAutorityFile(p.getAuthorityID(), p.getAuthorityURI(), p.getAuthorityValue());
+                newGroup.addPerson(person);
+            }
+        }
+        return newGroup;
+    }
+
+    private void copyPerson(DocStruct logical, DocStruct oldLogical, String metadataName) {
+        if (oldLogical.getAllPersons() != null) {
+            for (Person p : oldLogical.getAllPersons()) {
+                if (p.getType().getName().equals(metadataName)) {
+                    try {
+                        Person person = new Person(p.getType());
+                        person.setFirstname(p.getFirstname());
+                        person.setLastname(p.getLastname());
+                        person.setAutorityFile(p.getAuthorityID(), p.getAuthorityURI(), p.getAuthorityValue());
+                        logical.addPerson(person);
+                    } catch (UGHException e) {
+                        log.error(e);
+                    }
+                }
+            }
+        }
+    }
+
+    private void copyMetadata(DocStruct logical, DocStruct oldLogical, String metadataName) {
+        if (oldLogical.getAllMetadata() != null) {
+            for (Metadata md : oldLogical.getAllMetadata()) {
+                if (md.getType().getName().equals(metadataName)) {
+                    try {
+                        Metadata newMd = new Metadata(md.getType());
+                        newMd.setValue(md.getValue());
+                        newMd.setAutorityFile(md.getAuthorityID(), md.getAuthorityURI(), md.getAuthorityValue());
+                        logical.addMetadata(newMd);
+                    } catch (UGHException e) {
+                        log.error(e);
+                    }
+
+                }
+            }
+        }
+    }
+
+    private boolean createBackup() {
+        try {
+            Fileformat backup = new MetsMods(bean.getMyPrefs());
+            backup.setDigitalDocument(bean.getDocument());
+            return backup.write(bean.getMyProzess().getMetadataFilePath().replace("meta.xml", "backup.xml"));
+        } catch (UGHException | IOException | SwapException e) {
+            log.error(e);
+            return false;
+        }
     }
 
 }
