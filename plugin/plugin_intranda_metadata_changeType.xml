@@ -6,7 +6,9 @@
         <project>Project_A</project>
         <project>Project_B</project>
         <project>Archive_Project</project>
-
+        
+        <!-- property name, in dem das anzuzeigende Label gespeichert ist -->
+        <titleProperty>Title</titleProperty>
         
         <!-- Das Element templateProject ist wiederholbar und definiert diejenigen
             Projekte in Goobi workflow, aus denen Template-Vorgänge geladen und genutzt

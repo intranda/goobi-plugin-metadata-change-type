@@ -54,6 +54,8 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
 
     private List<String> metadataToCopy;
 
+    private String propertyName = "";
+
     @Getter
     private List<SelectItem> metadataTemplates;
 
@@ -78,6 +80,8 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
             return;
         }
 
+        propertyName = config.getString("/titleProperty", "title");
+
         List<String> templateProjectNames = Arrays.asList(config.getStringArray("/templateProject"));
 
         populateProcessList(templateProjectNames);
@@ -89,7 +93,10 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
     private void populateProcessList(List<String> templateProjectNames) {
         String metadataFolder = ConfigurationHelper.getInstance().getMetadataFolder();
         StringBuilder sb = new StringBuilder();
-        sb.append("select prozesseid, titel from prozesse where prozesse.ProjekteID in (select projekteid from projekte where titel in (");
+        sb.append("select prozesseid, WERT from prozesseeigenschaften where titel = '");
+        sb.append(propertyName);
+        sb.append("' and prozesseid in ( ");
+        sb.append("select prozesseid from prozesse where prozesse.ProjekteID in (select projekteid from projekte where titel in (");
         StringBuilder sublist = new StringBuilder();
         for (String template : templateProjectNames) {
             if (sublist.length() > 0) {
@@ -100,7 +107,7 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
             sublist.append("'");
         }
         sb.append(sublist.toString());
-        sb.append(")) order by titel;");
+        sb.append("))) order by WERT;");
 
         List<?> rows = ProcessManager.runSQL(sb.toString());
         for (Object obj : rows) {
