@@ -9,15 +9,17 @@ import java.util.List;
 
 import javax.faces.model.SelectItem;
 
+import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 import org.goobi.production.plugin.interfaces.IMetadataEditorExtension;
 
 import de.sub.goobi.config.ConfigPlugins;
-import de.sub.goobi.helper.StorageProvider;
+import de.sub.goobi.config.ConfigurationHelper;
 import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.SwapException;
 import de.sub.goobi.metadaten.Metadaten;
+import de.sub.goobi.persistence.managers.ProcessManager;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -42,15 +44,13 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
     private static final long serialVersionUID = 3644294549629729916L;
 
     @Getter
-    private String pagePath = "/uii/plugin_metadata_changeType.xhtml";
+    private String pagePath = "/uii/plugin_metadata_changeType.xhtml"; //NOSONAR
 
     @Getter
     private String title = "intranda_metadata_changeType";
 
     @Getter
     private String modalId = "changeTypeModal";
-
-    private String templateFolder;
 
     private List<String> metadataToCopy;
 
@@ -68,23 +68,46 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
         this.bean = bean;
 
         metadataTemplates = new ArrayList<>();
-        XMLConfiguration config = ConfigPlugins.getPluginConfig(title);
-        config.setExpressionEngine(new XPathExpressionEngine());
+        XMLConfiguration xml = ConfigPlugins.getPluginConfig(title);
+        xml.setExpressionEngine(new XPathExpressionEngine());
+
+        String projectName = bean.getMyProzess().getProjekt().getTitel();
+
+        SubnodeConfiguration config = xml.configurationAt("/section[project = '" + projectName + "']");
+        if (config == null) {
+            return;
+        }
+
+        List<String> templateProjectNames = Arrays.asList(config.getStringArray("/templateProject"));
+
+        populateProcessList(templateProjectNames);
 
         // get metadata whitelist to import some existing metadata to the new document (uuid, identifier, ...)
         metadataToCopy = Arrays.asList(config.getStringArray("/metadata"));
+    }
 
-        // get folder for template files from configuration
-        templateFolder = config.getString("/templateFolder");
+    private void populateProcessList(List<String> templateProjectNames) {
+        String metadataFolder = ConfigurationHelper.getInstance().getMetadataFolder();
+        StringBuilder sb = new StringBuilder();
+        sb.append("select prozesseid, titel from prozesse where prozesse.ProjekteID in (select projekteid from projekte where titel in (");
+        StringBuilder sublist = new StringBuilder();
+        for (String template : templateProjectNames) {
+            if (sublist.length() > 0) {
+                sublist.append(", ");
+            }
+            sublist.append("'");
+            sublist.append(template);
+            sublist.append("'");
+        }
+        sb.append(sublist.toString());
+        sb.append(")) order by titel;");
 
-        // list all file names
-
-        List<String> filenames = StorageProvider.getInstance().list(templateFolder);
-
-        for (String file : filenames) {
-            // get label for filenames? (remove extension, replace _ and - with spaces)
-            String label = file.replace(".xml", "").replace("-", " ").replace("_", " ");
-            // build SelectItem list
+        List<?> rows = ProcessManager.runSQL(sb.toString());
+        for (Object obj : rows) {
+            Object[] objArr = (Object[]) obj;
+            String id = (String) objArr[0];
+            String label = (String) objArr[1];
+            String file = metadataFolder + id + "/meta.xml";
             SelectItem si = new SelectItem(file, label);
             metadataTemplates.add(si);
         }
@@ -99,7 +122,7 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
 
         // create new fileformat based on selected template
 
-        Path path = Paths.get(templateFolder, selectedTemplate);
+        Path path = Paths.get(selectedTemplate);
         Fileformat newFileformat = null;
         DigitalDocument digDoc = null;
         try {
@@ -162,12 +185,15 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
     }
 
     private void copyGroup(DocStruct logical, DocStruct oldLogical, String metadataName) {
+        // collect metadata to keep
+        List<MetadataGroup> newGroups = new ArrayList<>();
+
         if (oldLogical.getAllMetadataGroups() != null) {
             for (MetadataGroup grp : oldLogical.getAllMetadataGroups()) {
                 if (grp.getType().getName().equals(metadataName)) {
                     try {
                         MetadataGroup newGroup = duplicateGroup(grp);
-                        logical.addMetadataGroup(newGroup);
+                        newGroups.add(newGroup);
                     } catch (UGHException e) {
                         log.error(e);
                     }
@@ -175,6 +201,30 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
                 }
             }
         }
+
+        if (!newGroups.isEmpty()) {
+            // cleanup existing metadata
+            List<MetadataGroup> removeList = new ArrayList<>();
+            if (logical.getAllMetadataGroups() != null) {
+                for (MetadataGroup grp : logical.getAllMetadataGroups()) {
+                    if (grp.getType().getName().equals(metadataName)) {
+                        removeList.add(grp);
+                    }
+                }
+            }
+            for (MetadataGroup md : removeList) {
+                logical.removeMetadataGroup(md, true);
+            }
+            // add new metadata
+            for (MetadataGroup md : newGroups) {
+                try {
+                    logical.addMetadataGroup(md);
+                } catch (UGHException e) {
+                    log.error(e);
+                }
+            }
+        }
+
     }
 
     private MetadataGroup duplicateGroup(MetadataGroup grp) throws MetadataTypeNotAllowedException {
@@ -200,6 +250,9 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
     }
 
     private void copyPerson(DocStruct logical, DocStruct oldLogical, String metadataName) {
+
+        // collect metadata to keep
+        List<Person> newMetadatatList = new ArrayList<>();
         if (oldLogical.getAllPersons() != null) {
             for (Person p : oldLogical.getAllPersons()) {
                 if (p.getType().getName().equals(metadataName)) {
@@ -208,16 +261,41 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
                         person.setFirstname(p.getFirstname());
                         person.setLastname(p.getLastname());
                         person.setAutorityFile(p.getAuthorityID(), p.getAuthorityURI(), p.getAuthorityValue());
-                        logical.addPerson(person);
+                        newMetadatatList.add(person);
                     } catch (UGHException e) {
                         log.error(e);
                     }
+
+                }
+            }
+        }
+        if (!newMetadatatList.isEmpty()) {
+            // cleanup existing metadata
+            List<Person> removeList = new ArrayList<>();
+            if (logical.getAllPersons() != null) {
+                for (Person p : logical.getAllPersons()) {
+                    if (p.getType().getName().equals(metadataName)) {
+                        removeList.add(p);
+                    }
+                }
+            }
+            for (Person md : removeList) {
+                logical.removePerson(md, true);
+            }
+            // add new metadata
+            for (Person md : newMetadatatList) {
+                try {
+                    logical.addPerson(md);
+                } catch (UGHException e) {
+                    log.error(e);
                 }
             }
         }
     }
 
     private void copyMetadata(DocStruct logical, DocStruct oldLogical, String metadataName) {
+        // collect metadata to keep
+        List<Metadata> newMetadatatList = new ArrayList<>();
         if (oldLogical.getAllMetadata() != null) {
             for (Metadata md : oldLogical.getAllMetadata()) {
                 if (md.getType().getName().equals(metadataName)) {
@@ -225,12 +303,35 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
                         Metadata newMd = new Metadata(md.getType());
                         newMd.setValue(md.getValue());
                         newMd.setAutorityFile(md.getAuthorityID(), md.getAuthorityURI(), md.getAuthorityValue());
-                        logical.addMetadata(newMd);
+                        newMetadatatList.add(newMd);
                     } catch (UGHException e) {
                         log.error(e);
                     }
 
                 }
+            }
+        }
+        if (!newMetadatatList.isEmpty()) {
+            // cleanup existing metadata
+            List<Metadata> removeList = new ArrayList<>();
+            if (logical.getAllMetadata() != null) {
+                for (Metadata md : logical.getAllMetadata()) {
+                    if (md.getType().getName().equals(metadataName)) {
+                        removeList.add(md);
+                    }
+                }
+            }
+            for (Metadata md : removeList) {
+                logical.removeMetadata(md, true);
+            }
+            // add new metadata
+            for (Metadata md : newMetadatatList) {
+                try {
+                    logical.addMetadata(md);
+                } catch (UGHException e) {
+                    log.error(e);
+                }
+
             }
         }
     }

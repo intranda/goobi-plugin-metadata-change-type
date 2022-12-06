@@ -1,8 +1,23 @@
 <config_plugin>
-	<!-- Folder in which the templates are saved -->
-	<templateFolder>/opt/digiverso/goobi/templates</templateFolder>
+    <!-- Eine Sektion enthält einen Konfigurationsblock. -->
+    <section>
+        <!-- Das Element project ist wiederholbar und definiert, innerhalb welcher
+            Projekte diese section genutzt werden kann. -->
+        <project>Project_A</project>
+        <project>Project_B</project>
+        <project>Archive_Project</project>
 
-	<!-- list of metadata to copy into the new template -->
-	<metadata>CatalogIDDigital</metadata>
-	<metadata>DisplayLayout</metadata>
+        
+        <!-- Das Element templateProject ist wiederholbar und definiert diejenigen
+            Projekte in Goobi workflow, aus denen Template-Vorgänge geladen und genutzt
+            werden sollen. Per Konvention ist festgelegt, dass der Ursprungsregelsatz
+            und Templateregelsatz identisch sein müssen, damit ein Vorgang in dem
+            Makro-Modal angezeigt wird. -->
+        <templateProject>Template_1</templateProject>
+        <templateProject>Template_2</templateProject>
+        
+        <!-- list of metadata to copy into the new template -->
+        <metadata>CatalogIDDigital</metadata>
+        <metadata>DisplayLayout</metadata>
+    </section>
 </config_plugin>
