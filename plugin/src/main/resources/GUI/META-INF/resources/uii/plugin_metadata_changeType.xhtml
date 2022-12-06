@@ -36,7 +36,8 @@
                             class="close"
                             data-dismiss="modal"
                             aria-label="Close">
-                            <span aria-hidden="true"> <h:outputText
+                            <span aria-hidden="true">
+                                <h:outputText
                                     value="&amp;times;"
                                     escape="false" />
                             </span>
@@ -48,14 +49,18 @@
                         styleClass="modal-body"
                         rendered="#{Metadaten.extension.title == 'intranda_metadata_changeType'}">
                         <h:form styleClass="form-horizontal form-bordered">
+                            <p>
+                                <h:outputText value="#{msgs.plugin_metadata_changeTemplate_description}" />
+                            </p>
+
 
                             <div class="form-group form-group--flex">
                                 <div class="row justify-content-between">
                                     <div class="col-3">
                                         <h:outputText
                                             styleClass="form-group__label"
-                                            value="#{msgs.mtadataTemplate}"
-                                            title="#{msgs.mtadataTemplate}" />
+                                            value="#{msgs.plugin_metadata_changeTemplate_selectTemplate}"
+                                            title="#{msgs.plugin_metadata_changeTemplate_selectTemplate}" />
                                     </div>
                                     <div class="col-7">
                                         <div class="form-control form-control--select">
@@ -73,12 +78,13 @@
                                     <div class="col-2">
                                         <button
                                             jsf:id="changeTemplate"
-                                            class="dropdown-item"
+                                            class="btn btn--white dropdown-item"
                                             jsf:action="#{Metadaten.extension.changeTemplate}">
                                             <i
                                                 class="fa fa-save"
+                                                style="margin-right: 5px;"
                                                 aria-hidden="true"></i>
-                                            <h:outputText value="#{msgs.changeTemplate}" />
+                                            <h:outputText value="#{msgs.plugin_metadata_changeTemplate_changeTemplate}" />
 
                                         </button>
                                     </div>
