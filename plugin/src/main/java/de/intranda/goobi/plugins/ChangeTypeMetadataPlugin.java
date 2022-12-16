@@ -74,9 +74,10 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
         xml.setExpressionEngine(new XPathExpressionEngine());
 
         String projectName = bean.getMyProzess().getProjekt().getTitel();
-
-        SubnodeConfiguration config = xml.configurationAt("/section[project = '" + projectName + "']");
-        if (config == null) {
+        SubnodeConfiguration config = null;
+        try {
+            config = xml.configurationAt("/section[project = '" + projectName + "']");
+        } catch (IllegalArgumentException e) {
             return;
         }
 
