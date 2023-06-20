@@ -78,11 +78,11 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
         try {
             config = xml.configurationAt("/section[project = '" + projectName + "']");
         } catch (IllegalArgumentException e) {
-            return;
+            log.info("Error during plugin initialization", e);
+            throw e;
         }
 
         propertyName = config.getString("/titleProperty", "title");
-
         List<String> templateProjectNames = Arrays.asList(config.getStringArray("/templateProject"));
 
         populateProcessList(templateProjectNames);
