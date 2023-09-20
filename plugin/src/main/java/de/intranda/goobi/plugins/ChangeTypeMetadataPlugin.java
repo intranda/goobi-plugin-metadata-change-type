@@ -168,6 +168,9 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
                         newPage.addMetadata(newMd);
                     }
 
+                    // assign images to new logical element
+                    logical.addReferenceTo(newPage, "logical_physical");
+
                 } catch (UGHException e) {
                     log.error(e);
                 }
