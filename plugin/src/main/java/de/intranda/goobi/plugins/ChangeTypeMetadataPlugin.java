@@ -78,7 +78,6 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
         try {
             config = xml.configurationAt("/section[project = '" + projectName + "']");
         } catch (IllegalArgumentException e) {
-            log.info("Error during plugin initialization", e);
             throw e;
         }
 
