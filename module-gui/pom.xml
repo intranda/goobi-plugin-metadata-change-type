@@ -2,10 +2,10 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>io.goobi.workflow.plugin</groupId>
-    <artifactId>plugin-step-changeType</artifactId>
+    <artifactId>plugin-step-change-type</artifactId>
     <version>24.03-SNAPSHOT</version>
   </parent>
-  <artifactId>plugin-step-changeType-gui</artifactId>
+  <artifactId>plugin-step-change-type-gui</artifactId>
   <packaging>jar</packaging>
   <build>
     <resources>
