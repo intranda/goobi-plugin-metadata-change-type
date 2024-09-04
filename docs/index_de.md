@@ -1,12 +1,12 @@
 ---
-title: Publikationstyp Änderung
+title: Publikationstyp ändern
 identifier: intranda_metadata_changeType
-description: Plugin für die Änderungen des Publikationstyps im Goobi workflow
+description: Plugin für die Änderung des Publikationstyps für einen Goobi Vorgang
 published: true
 ---
 
 ## Einführung
-Dieses Plugin ermöglicht die Änderung des Publikationstyps in Goobi workflow.
+Dieses Plugin ermöglicht die Änderung des Publikationstyps aus dem Metadateneditor von Goobi workflow.
 
 ## Installation
 Um das Plugin nutzen zu können, müssen folgende Dateien installiert werden:
@@ -42,7 +42,7 @@ Die folgende Tabelle enthält eine Zusammenstellung der Parameter und ihrer Besc
 Parameter               | Erläuterung
 ------------------------|------------------------------------
 `<section>`                      | ist wiederholbar und erlaubt somit unterschiedliche Konfigurationen für verschiedene Projekte |
-`<project>`                      | legt fest, für welche Projekt(e) der aktuelle Bereich gilt. Das Feld ist wiederholbar, um so eine gemeinsame Konfiguration für mehrere Projekte verwenden zu können. |
+`<project>`                      | legt fest, für welche Projekt(e) der aktuelle Bereich gilt; das Feld ist wiederholbar, um so eine gemeinsame Konfiguration für mehrere Projekte verwenden zu können |
 `<titleProperty>`                      | enthält den Namen der Vorgangseigenschaft, in dem das zu verwendende Label steht |
 `<templateProject>`                      | Name des Projekts, aus dem die Templates gelesen werden sollen. Es werden alle Vorgänge aus dem Projekt aufgelistet, die über ein Label verfügen. |
 `<metadata>`                      | Liste an Metadaten, die aus der originalen Datei in die neue Datei überführt werden sollen | 
