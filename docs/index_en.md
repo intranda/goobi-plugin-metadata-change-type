@@ -1,12 +1,12 @@
 ---
-title: Publication Type Change
+title: Change Publication Type
 identifier: intranda_metadata_changeType
 description: Plugin for changing the publication type in the Goobi workflow
 published: true
 ---
 
 ## Introduction
-This plugin allows the modification of the publication type within the Goobi workflow.
+This plugin allows the modification of the publication type within the metadata editor of Goobi workflow.
 
 ## Installation
 To use the plugin, the following files must be installed:
@@ -18,6 +18,7 @@ To use the plugin, the following files must be installed:
 ```
 
 After installation, the functionality of the plugin is available within the REST API of Goobi workflow.
+
 ## Overview and functionality
 Once the plugin is installed, a new function will appear in the metadata editor's menu, listing all installed and configured plugins. To use the plugin for changing the publication type, templates must first be created in the configured project. These templates need to be pre-populated with the desired metadata, and the process property for the label must be assigned. Once the templates are created, they will be available in a selection list.
 
