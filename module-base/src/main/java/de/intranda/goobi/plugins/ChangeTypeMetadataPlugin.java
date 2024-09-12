@@ -78,6 +78,7 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
         try {
             config = xml.configurationAt("/section[project = '" + projectName + "']");
         } catch (IllegalArgumentException e) {
+            log.error(e);
             throw e;
         }
 
@@ -243,7 +244,7 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
             for (Metadata md : grp.getMetadataList()) {
                 Metadata newMd = new Metadata(md.getType());
                 newMd.setValue(md.getValue());
-                newMd.setAutorityFile(md.getAuthorityID(), md.getAuthorityURI(), md.getAuthorityValue());
+                newMd.setAuthorityFile(md.getAuthorityID(), md.getAuthorityURI(), md.getAuthorityValue());
                 newGroup.addMetadata(newMd);
             }
         }
@@ -252,7 +253,7 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
                 Person person = new Person(p.getType());
                 person.setFirstname(p.getFirstname());
                 person.setLastname(p.getLastname());
-                person.setAutorityFile(p.getAuthorityID(), p.getAuthorityURI(), p.getAuthorityValue());
+                person.setAuthorityFile(p.getAuthorityID(), p.getAuthorityURI(), p.getAuthorityValue());
                 newGroup.addPerson(person);
             }
         }
@@ -270,12 +271,11 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
                         Person person = new Person(p.getType());
                         person.setFirstname(p.getFirstname());
                         person.setLastname(p.getLastname());
-                        person.setAutorityFile(p.getAuthorityID(), p.getAuthorityURI(), p.getAuthorityValue());
+                        person.setAuthorityFile(p.getAuthorityID(), p.getAuthorityURI(), p.getAuthorityValue());
                         newMetadatatList.add(person);
                     } catch (UGHException e) {
                         log.error(e);
                     }
-
                 }
             }
         }
@@ -312,7 +312,7 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
                     try {
                         Metadata newMd = new Metadata(md.getType());
                         newMd.setValue(md.getValue());
-                        newMd.setAutorityFile(md.getAuthorityID(), md.getAuthorityURI(), md.getAuthorityValue());
+                        newMd.setAuthorityFile(md.getAuthorityID(), md.getAuthorityURI(), md.getAuthorityValue());
                         newMetadatatList.add(newMd);
                     } catch (UGHException e) {
                         log.error(e);

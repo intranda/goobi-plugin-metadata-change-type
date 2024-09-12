@@ -8,8 +8,8 @@
 		<exec executable="mvn">
 			<arg value="package"/>
 		</exec>
-		<copy file="module-main/target/plugin_intranda_metadataeditor_${name}.jar" todir="/opt/digiverso/goobi/plugins/metadata/" overwrite="true"/>
-		<copy file="module-gui/target/plugin_intranda_metadataeditor_${name}-GUI.jar" todir="/opt/digiverso/goobi/plugins/GUI/" overwrite="true"/>
+		<copy file="module-base/target/plugin-metadata-change-type-base.jar" todir="/opt/digiverso/goobi/plugins/metadata/" overwrite="true"/>
+		<copy file="module-gui/target/plugin-metadata-change-type-gui.jar" todir="/opt/digiverso/goobi/plugins/GUI/" overwrite="true"/>
 	</target>
 
 </project>
