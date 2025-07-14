@@ -93,9 +93,9 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
     private void populateProcessList(List<String> templateProjectNames) {
         String metadataFolder = ConfigurationHelper.getInstance().getMetadataFolder();
         StringBuilder sb = new StringBuilder();
-        sb.append("select prozesseid, WERT from prozesseeigenschaften where titel = '");
+        sb.append("select object_id, property_value from properties where property_name = '");
         sb.append(propertyName);
-        sb.append("' and prozesseid in ( ");
+        sb.append("' and object_type = 'process' and object_id in ( ");
         sb.append("select prozesseid from prozesse where prozesse.ProjekteID in (select projekteid from projekte where titel in (");
         StringBuilder sublist = new StringBuilder();
         for (String template : templateProjectNames) {
@@ -107,7 +107,7 @@ public class ChangeTypeMetadataPlugin implements IMetadataEditorExtension {
             sublist.append("'");
         }
         sb.append(sublist.toString());
-        sb.append("))) order by WERT;");
+        sb.append("))) order by property_value;");
 
         List<?> rows = ProcessManager.runSQL(sb.toString());
         for (Object obj : rows) {
