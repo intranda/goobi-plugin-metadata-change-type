@@ -3,6 +3,10 @@ title: Publikationstyp ändern
 identifier: intranda_metadata_changeType
 description: Plugin für die Änderung des Publikationstyps für einen Goobi Vorgang
 published: true
+keywords:
+    - Goobi workflow
+    - Plugin
+    - Metadata Plugin
 ---
 
 ## Einführung
