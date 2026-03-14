@@ -15,8 +15,8 @@ Detail                      | Description
 **Plugin identifier**       | intranda_metadata_changeType
 **Plugin type**             | metadata
 **Licence**                 | GPL 2.0 or newer
-**Documentation (German)**  | https://docs.goobi.io/workflow-plugins/v/ger/metadata/goobi-plugin-metadata-change-type
-**Documentation (English)** | https://docs.goobi.io/workflow-plugins/v/eng/metadata/goobi-plugin-metadata-change-type
+**Documentation (German)**  | https://docs.goobi.io/de/workflow/plugins/metadata/goobi-plugin-metadata-change-type
+**Documentation (English)** | https://docs.goobi.io/en/workflow/plugins/metadata/goobi-plugin-metadata-change-type
 
 ## Goobi details
 
