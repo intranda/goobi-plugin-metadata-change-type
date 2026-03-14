@@ -30,7 +30,7 @@ Once the plugin is installed, a new function will appear in the metadata editor'
 
 When the user selects the plugin, a dialog window will open, listing the available templates for different publication types. The user can select the desired publication type and save the change.
 
-![The type can be selceted here](screen2_en.png)
+![The type can be selected here](screen2_en.png)
 
 When the publication type is switched, a backup of the existing metadata file is created first. Then, the metadata from the selected template is copied into the process. If the old record already contains pagination and page assignments, this data will also be transferred.
 
